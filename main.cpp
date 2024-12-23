@@ -1,38 +1,30 @@
-#include <iostream>
 #include "SchemaManager.h"
 #include "BufferManager.h"
+#include <iostream>
 
-int main(){
+int main() {
+    // Crear un objeto de SchemaManager
     SchemaManager schemaManager;
+
+    // Cargar un archivo de esquema (usando un nombre de archivo válido)
     schemaManager.cargarSchema("Schema.txt");
 
-    std::cout<<"Tablas cargadas:"<<std::endl;
-    schemaManager.mostrarTablas();
+    // Crear índice sobre una tabla y una columna específica
+    schemaManager.crearIndice("customer", "first_name");
 
-    BufferManager bufferManager(3);
+    // Buscar índice con un valor específico
+    std::vector<size_t> indices = schemaManager.buscarIndice("customer", "first_name", "John");
 
-    std::cout<<"\nObteniendo paginas del buffer..."<<std::endl;
-
-    std::string pagina1 = bufferManager.getPagina("actor", 1, schemaManager);
-    std::cout<<"Pagina 1 de actor cargada: "<<pagina1.substr(0, 50)<<"...\n";
-
-    std::string pagina2 = bufferManager.getPagina("actor", 2, schemaManager);
-    std::cout<<"Pagina 2 de actor cargada: "<<pagina2.substr(0, 50)<<"...\n";
-
-    std::string pagina3 = bufferManager.getPagina("address", 1, schemaManager);
-    std::cout<<"Pagina 1 de address cargada: "<<pagina3.substr(0, 50)<<"...\n";
-
-    std::string pagina4 = bufferManager.getPagina("actor", 3, schemaManager);
-    std::cout<<"Pagina 3 de actor cargada: "<<pagina4.substr(0, 50)<<"...\n";
-
-    std::cout<<"\nContenido del buffer después de cargar 4 paginas:"<<std::endl;
-    bufferManager.mostrarBufferContenido();
-
-    std::string pagina5 = bufferManager.getPagina("actor", 1, schemaManager);
-    std::cout<<"Pagina 1 de actor (cargada nuevamente): "<<pagina5.substr(0, 50)<<"...\n";
-
-    std::cout<<"\nContenido del buffer final:"<<std::endl;
-    bufferManager.mostrarBufferContenido();
+    // Mostrar los índices encontrados
+    if (indices.empty()) {
+        std::cout << "No se encontraron índices para el valor 'John' en la columna 'first_name'." << std::endl;
+    } else {
+        std::cout << "Índices encontrados para 'John': ";
+        for (size_t idx : indices) {
+            std::cout << idx << " ";
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }

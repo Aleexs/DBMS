@@ -6,22 +6,40 @@
 
 BufferManager::BufferManager(size_t maxPaginas) : maxPaginas(maxPaginas){}
 
-Pagina BufferManager::cargarPaginaArchivo(const std::string& tablaNombre, int paginaNumero, const SchemaManager& schemaManager){
+Pagina BufferManager::cargarPaginaArchivo(const std::string& tablaNombre, int paginaNumero, const SchemaManager& schemaManager) {
     std::ifstream file("Schema/" + tablaNombre + ".txt");
-    if (!file){
+    if (!file) {
         std::cerr<<"Error: No se puede abrir el archivo de la tabla "<<tablaNombre<<std::endl;
-        return{"", -1, ""};
+        return {"", -1, ""};
     }
 
+    const int filasPorPagina = 10;
+    int lineaInicio = paginaNumero * filasPorPagina;
+    int lineaFin = lineaInicio + filasPorPagina;
+
+    std::string linea;
     std::ostringstream dataStream;
-    dataStream<<file.rdbuf();
+    int contadorLineas = 0;
 
-    std::string data = dataStream.str();
-    std::cout<<"Datos de la pagina leida de "<<tablaNombre<<": "<<data.substr(0, 50)<<"...\n";
+    while (std::getline(file, linea)) {
+        if (contadorLineas >= lineaInicio && contadorLineas < lineaFin) {
+            dataStream<<linea<<"\n";
+        }
+        if (contadorLineas >= lineaFin) {
+            break;
+        }
+        contadorLineas++;
+    }
 
-    Pagina pagina ={tablaNombre, paginaNumero, data};
+    if (dataStream.str().empty()) {
+        std::cerr<<"Advertencia: La pagina "<<paginaNumero<<" de la tabla "<<tablaNombre<<" está vacia\n";
+        return {"", -1, ""};
+    }
+
+    Pagina pagina = {tablaNombre, paginaNumero, dataStream.str()};
     return pagina;
 }
+
 
 
 std::string BufferManager::getPagina(const std::string& tablaNombre, int paginaNumero, const SchemaManager& schemaManager){
